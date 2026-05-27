@@ -13,8 +13,11 @@ test.describe("Dashboard", () => {
   });
 
   test("dashboard shows enrolled participants after enrolment", async ({ page }) => {
-    // Enrol a participant
-    const nhs = "1112223339";
+    // Enrol a participant.
+    // Use a NHS number that is NOT shared with any enrolment.spec.ts test to avoid
+    // a "duplicate NHS number" collision when the test files run sequentially
+    // (dashboard.spec.ts executes first because files are sorted alphabetically).
+    const nhs = "4444333322";
     const email = `dash_test_${Date.now()}@example.com`;
 
     await page.goto("/person");

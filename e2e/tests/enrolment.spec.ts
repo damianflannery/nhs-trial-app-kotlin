@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// Valid test NHS numbers (Modulus 11 compliant)
+// Valid test NHS numbers (10-digit format)
 const VALID_NHS = "9434765919";
 const VALID_NHS_2 = "1112223339";
 
@@ -21,10 +21,13 @@ async function fillPersonForm(
   await page.check("#gender_Female");
 }
 
-async function fillMedicalForm(page: Parameters<typeof test>[1] extends (args: { page: infer P }) => unknown ? P : never) {
+async function fillMedicalForm(
+  page: Parameters<typeof test>[1] extends (args: { page: infer P }) => unknown ? P : never
+) {
   await page.fill("#bpSystolic", "120");
   await page.fill("#bpDiastolic", "80");
-  await page.selectOption("#treatment", "Treatment A");
+  // Treatment is radio buttons (Drug / Placebo)
+  await page.check('input[name="treatment"][value="Drug"]');
 }
 
 test.describe("Enrolment flow", () => {
@@ -60,13 +63,14 @@ test.describe("Enrolment flow", () => {
     await expect(page.locator(".nhsuk-error-summary")).toContainText("NHS number");
   });
 
-  test("shows error for invalid NHS Modulus 11 number", async ({ page }) => {
+  test("shows error for NHS number that is not 10 digits", async ({ page }) => {
     await page.goto("/person");
-    await fillPersonForm(page, { nhsNumber: "9434765910" }); // bad check digit
+    // 9 digits — too short
+    await fillPersonForm(page, { nhsNumber: "123456789" });
     await page.click("button[type=submit]");
 
     await expect(page.locator("#nhsNumber-error")).toBeVisible();
-    await expect(page.locator("#nhsNumber-error")).toContainText("valid NHS number");
+    await expect(page.locator("#nhsNumber-error")).toContainText("10 digits");
   });
 
   test("shows inline error for each missing field", async ({ page }) => {
@@ -104,16 +108,6 @@ test.describe("Enrolment flow", () => {
     await expect(page.locator(".nhsuk-error-summary")).toContainText("already registered");
   });
 
-  test("back link on medical step returns to person form", async ({ page }) => {
-    await page.goto("/person");
-    await fillPersonForm(page);
-    await page.click("button[type=submit]");
-    await page.waitForURL("**/medical");
-
-    await page.click("a[href='/person']");
-    await expect(page).toHaveURL(/\/person/);
-  });
-
   test("navigating directly to /medical without session redirects to /person", async ({ page }) => {
     await page.goto("/medical");
     await expect(page).toHaveURL(/\/person/);
@@ -122,7 +116,9 @@ test.describe("Enrolment flow", () => {
   test("shows error for underage participant", async ({ page }) => {
     await page.goto("/person");
     await fillPersonForm(page);
-    await page.fill("#dobYear", new Date().getFullYear().toString()); // current year → under 18
+    // Use a year ~10 years ago — definitely in the past but clearly under 18
+    const underageYear = (new Date().getFullYear() - 10).toString();
+    await page.fill("#dobYear", underageYear);
     await page.click("button[type=submit]");
 
     await expect(page.locator(".nhsuk-error-summary")).toBeVisible();

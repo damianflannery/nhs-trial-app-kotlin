@@ -204,6 +204,23 @@ In the Java validator, `request.getParameter()` can return `null`. The code guar
 
 In Kotlin, `String?` (nullable) and `String` (non-nullable) are distinct types. A nullable value cannot be passed where a non-nullable is expected without an explicit null check — the compiler refuses to compile the code.
 
+### 5. Custom JavaScript removed
+
+The Java project contains a hand-written `validation.js` that duplicates the server-side validation rules client-side. It has its own test suite (Karma + Jasmine) that must be kept in sync with the Java validator whenever a rule changes — two places to update, two suites to run.
+
+The Kotlin project has **zero lines of custom JavaScript**. The only JS files on disk are the vendored NHS Design System bundle (third-party, unmodified) and a build-time Node script that copies assets into the resource directory. Neither is code the team owns or maintains.
+
+What replaced `validation.js`:
+
+| Java need | Kotlin replacement |
+|---|---|
+| AJAX form submission (no full reload) | Three HTMX attributes on the `<form>` tag (`hx-post`, `hx-target`, `hx-swap`) |
+| Partial page update on error | HTMX swaps the returned form fragment in-place |
+| Client-side redirect on success | Server sends `HX-Redirect` header; HTMX navigates the browser |
+| `validation.js` unit tests (Karma/Jasmine) | Playwright E2E tests cover the same user-visible outcomes end-to-end |
+
+The result is one source of truth for validation logic (the Kotlin validator), one test suite, and no risk of the client and server drifting out of sync.
+
 ---
 
 ## Code comparison: JSP + Servlet vs kotlinx.html + Ktor

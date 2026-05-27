@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: nhstrial
+      POSTGRES_USER: nhstrial
+      POSTGRES_PASSWORD: nhstrial
+    ports:
+      - "5435:5432"
+    volumes:
+      - nhstrial_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nhstrial"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  nhstrial_data:

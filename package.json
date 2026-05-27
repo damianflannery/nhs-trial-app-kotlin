@@ -1,0 +1,11 @@
+{
+  "name": "nhs-trial-app-kotlin",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "copy-assets": "node scripts/copy-assets.js"
+  },
+  "dependencies": {
+    "nhsuk-frontend": "^9.3.0"
+  }
+}

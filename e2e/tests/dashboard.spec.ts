@@ -5,7 +5,8 @@ test.describe("Dashboard", () => {
     await page.goto("/");
     await page.click("a[href='/dashboard']");
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.locator("h1")).toContainText("Blood pressure dashboard");
+    // Dashboard uses an h2 inside the chart card rather than a page h1
+    await expect(page.locator("h2").first()).toContainText("Blood Pressure Plot");
   });
 
   test("dashboard shows enrolled participants after enrolment", async ({ page }) => {
@@ -27,16 +28,20 @@ test.describe("Dashboard", () => {
     await page.waitForURL("**/medical");
     await page.fill("#bpSystolic", "135");
     await page.fill("#bpDiastolic", "85");
-    await page.selectOption("#treatment", "Placebo");
+    // Treatment is radio buttons
+    await page.check('input[name="treatment"][value="Placebo"]');
     await page.click("button[type=submit]");
     await page.waitForURL("**/thankyou");
 
-    // Check dashboard
+    // Check dashboard — data is inlined as JSON and reflected in the stats bar
     await page.goto("/dashboard");
-    const table = page.locator(".nhsuk-table");
-    await expect(table).toBeVisible();
-    await expect(table).toContainText("Bob");
-    await expect(table).toContainText("135");
-    await expect(table).toContainText("Placebo");
+    await expect(page.locator("#bpChart")).toBeVisible();
+    await expect(page.locator(".db-stat-value")).not.toContainText("0");
+
+    // Participant data is embedded in the page as window.__bpData JSON
+    const content = await page.content();
+    expect(content).toContain("Bob");
+    expect(content).toContain("135");
+    expect(content).toContain("Placebo");
   });
 });

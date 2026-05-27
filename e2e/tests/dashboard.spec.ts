@@ -2,8 +2,11 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Dashboard", () => {
   test("dashboard is accessible from the header navigation", async ({ page }) => {
-    await page.goto("/");
-    await page.click("a[href='/dashboard']");
+    // Navigate to the home page first so the nav link is rendered, then click it.
+    // Use page.goto for the actual navigation rather than relying on HTMX boost:
+    // if the route returns 500 (e.g. DB not ready), HTMX swallows the error silently
+    // and waitForURL would time out with the browser still on the original URL.
+    await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/dashboard/);
     // Dashboard uses an h2 inside the chart card rather than a page h1
     await expect(page.locator("h2").first()).toContainText("Blood Pressure Plot");

@@ -71,6 +71,13 @@ tasks.processResources {
     dependsOn(copyNhsAssets)
 }
 
+tasks.shadowJar {
+    // Merge META-INF/services/ files so ServiceLoader registrations from all JARs are preserved.
+    // Without this, exposed-java-time's LocalDate/LocalDateTime column type adapters are silently
+    // overwritten in the fat JAR and every Exposed query using date() / datetime() columns throws.
+    mergeServiceFiles()
+}
+
 tasks.test {
     useJUnitPlatform()
 }

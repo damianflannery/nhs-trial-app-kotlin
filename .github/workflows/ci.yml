@@ -65,9 +65,11 @@ jobs:
       - name: Start app stack
         run: |
           docker compose -f docker-compose.e2e.yml up -d
-          # Wait for app to be ready
+          # Wait for the /health probe — this hits the DB, so it only succeeds
+          # once Flyway has migrated and Exposed has a live connection.
+          # GET /person would succeed immediately (no DB call) and mask startup failures.
           for i in $(seq 1 30); do
-            curl -sf http://localhost:8080/person && break
+            curl -sf http://localhost:8080/health && break
             sleep 2
           done
 

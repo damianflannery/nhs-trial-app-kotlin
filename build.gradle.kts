@@ -5,19 +5,17 @@ plugins {
     kotlin("plugin.serialization") version "2.1.0"
     id("com.github.node-gradle.node") version "7.0.2"
     id("com.gradleup.shadow") version "8.3.6"
+    id("com.ncorti.ktfmt.gradle") version "0.26.0"
     application
 }
 
 group = "com.nhstrial"
+
 version = "1.0-SNAPSHOT"
 
-application {
-    mainClass.set("io.ktor.server.netty.EngineMain")
-}
+application { mainClass.set("io.ktor.server.netty.EngineMain") }
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 val ktorVersion = "3.0.3"
 val exposedVersion = "0.53.0"
@@ -60,15 +58,18 @@ node {
     download.set(true)
 }
 
-val copyNhsAssets = tasks.register<NpmTask>("copyNhsAssets") {
-    dependsOn(tasks.npmInstall)
-    args.set(listOf("run", "copy-assets"))
-    inputs.dir("node_modules/nhsuk-frontend")
-    outputs.dir("src/main/resources/static/nhsuk")
-}
+val copyNhsAssets =
+    tasks.register<NpmTask>("copyNhsAssets") {
+        dependsOn(tasks.npmInstall)
+        args.set(listOf("run", "copy-assets"))
+        inputs.dir("node_modules/nhsuk-frontend")
+        outputs.dir("src/main/resources/static/nhsuk")
+    }
 
-tasks.processResources {
-    dependsOn(copyNhsAssets)
+tasks.processResources { dependsOn(copyNhsAssets) }
+
+ktfmt {
+    kotlinLangStyle() // Kotlin coding conventions: 4-space indent, 100-char line width
 }
 
 tasks.shadowJar {
@@ -78,10 +79,6 @@ tasks.shadowJar {
     mergeServiceFiles()
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
+tasks.test { useJUnitPlatform() }
 
-kotlin {
-    jvmToolchain(21)
-}
+kotlin { jvmToolchain(21) }

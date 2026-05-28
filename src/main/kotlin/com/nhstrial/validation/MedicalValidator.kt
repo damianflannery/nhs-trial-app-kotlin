@@ -17,14 +17,16 @@ fun validateMedical(form: MedicalForm): Pair<ValidationResult, MedicalData?> {
         when {
             form.bpSystolic.isBlank() -> error("bpSystolic", "Enter a systolic blood pressure")
             systolic == null -> error("bpSystolic", "Systolic blood pressure must be a number")
-            systolic !in 50..300 -> error("bpSystolic", "Systolic blood pressure must be between 50 and 300")
+            systolic !in 50..300 ->
+                error("bpSystolic", "Systolic blood pressure must be between 50 and 300")
         }
 
         val diastolic = form.bpDiastolic.trim().toIntOrNull()
         when {
             form.bpDiastolic.isBlank() -> error("bpDiastolic", "Enter a diastolic blood pressure")
             diastolic == null -> error("bpDiastolic", "Diastolic blood pressure must be a number")
-            diastolic !in 50..300 -> error("bpDiastolic", "Diastolic blood pressure must be between 50 and 300")
+            diastolic !in 50..300 ->
+                error("bpDiastolic", "Diastolic blood pressure must be between 50 and 300")
         }
 
         when {
@@ -39,10 +41,11 @@ fun validateMedical(form: MedicalForm): Pair<ValidationResult, MedicalData?> {
 
     if (result.hasErrors) return result to null
 
-    return result to MedicalData(
-        bpSystolic = form.bpSystolic.trim().toInt(),
-        bpDiastolic = form.bpDiastolic.trim().toInt(),
-        treatment = form.treatment,
-        sideEffects = form.sideEffects.trim().ifBlank { null },
-    )
+    return result to
+        MedicalData(
+            bpSystolic = form.bpSystolic.trim().toInt(),
+            bpDiastolic = form.bpDiastolic.trim().toInt(),
+            treatment = form.treatment,
+            sideEffects = form.sideEffects.trim().ifBlank { null },
+        )
 }

@@ -16,9 +16,7 @@ import io.ktor.server.sessions.*
 import kotlinx.html.*
 
 fun Route.personRoutes(personRepository: PersonRepository, trialService: TrialService) {
-    get("/") {
-        call.respondRedirect("/person")
-    }
+    get("/") { call.respondRedirect("/person") }
 
     get("/person") {
         call.respondHtml {
@@ -40,40 +38,42 @@ fun Route.personRoutes(personRepository: PersonRepository, trialService: TrialSe
 
     post("/person") {
         val params = call.receiveParameters()
-        val form = PersonForm(
-            nhsNumber = params["nhsNumber"].orEmpty(),
-            firstName = params["firstName"].orEmpty(),
-            lastName = params["lastName"].orEmpty(),
-            email = params["email"].orEmpty(),
-            dobDay = params["dobDay"].orEmpty(),
-            dobMonth = params["dobMonth"].orEmpty(),
-            dobYear = params["dobYear"].orEmpty(),
-            gender = params["gender"].orEmpty(),
-        )
+        val form =
+            PersonForm(
+                nhsNumber = params["nhsNumber"].orEmpty(),
+                firstName = params["firstName"].orEmpty(),
+                lastName = params["lastName"].orEmpty(),
+                email = params["email"].orEmpty(),
+                dobDay = params["dobDay"].orEmpty(),
+                dobMonth = params["dobMonth"].orEmpty(),
+                dobYear = params["dobYear"].orEmpty(),
+                gender = params["gender"].orEmpty(),
+            )
 
         val (result, personData) = validatePerson(form)
 
         // Uniqueness checks only when format is valid
-        val errors = if (!result.hasErrors && personData != null) {
-            val extraErrors = mutableMapOf<String, String>()
-            if (trialService.existsByNhsNumber(personData.nhsNumber)) {
-                extraErrors["nhsNumber"] = "A participant with this NHS number is already registered"
+        val errors =
+            if (!result.hasErrors && personData != null) {
+                val extraErrors = mutableMapOf<String, String>()
+                if (trialService.existsByNhsNumber(personData.nhsNumber)) {
+                    extraErrors["nhsNumber"] =
+                        "A participant with this NHS number is already registered"
+                }
+                if (trialService.existsByEmail(personData.email)) {
+                    extraErrors["email"] =
+                        "A participant with this email address is already registered"
+                }
+                result.errors + extraErrors
+            } else {
+                result.errors
             }
-            if (trialService.existsByEmail(personData.email)) {
-                extraErrors["email"] = "A participant with this email address is already registered"
-            }
-            result.errors + extraErrors
-        } else {
-            result.errors
-        }
 
         val isHtmx = call.request.headers["HX-Request"] == "true"
 
         if (errors.isNotEmpty()) {
             if (isHtmx) {
-                call.respondHtml {
-                    body { personFormContent(form, errors) }
-                }
+                call.respondHtml { body { personFormContent(form, errors) } }
             } else {
                 call.respondHtml {
                     nhsPage("Participant details – step 1 of 2") {

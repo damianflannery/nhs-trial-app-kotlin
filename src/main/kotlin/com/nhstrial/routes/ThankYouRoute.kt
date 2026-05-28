@@ -15,9 +15,7 @@ fun Route.thankYouRoute() {
                         div(classes = "nhsuk-grid-row") {
                             div(classes = "nhsuk-grid-column-two-thirds") {
                                 div(classes = "nhsuk-panel") {
-                                    h1(classes = "nhsuk-panel__title") {
-                                        +"Registration complete"
-                                    }
+                                    h1(classes = "nhsuk-panel__title") { +"Registration complete" }
                                     div(classes = "nhsuk-panel__body") {
                                         +"The participant has been successfully enrolled in the clinical trial."
                                     }
@@ -25,12 +23,18 @@ fun Route.thankYouRoute() {
                                 h2(classes = "nhsuk-heading-m nhsuk-u-margin-top-6") {
                                     +"What happens next"
                                 }
-                                p { +"The participant's details and clinical measurements have been saved to the trial database." }
                                 p {
-                                    a(href = "/person", classes = "nhsuk-link") { +"Enrol another participant" }
+                                    +"The participant's details and clinical measurements have been saved to the trial database."
                                 }
                                 p {
-                                    a(href = "/dashboard", classes = "nhsuk-link") { +"Go to dashboard" }
+                                    a(href = "/person", classes = "nhsuk-link") {
+                                        +"Enrol another participant"
+                                    }
+                                }
+                                p {
+                                    a(href = "/dashboard", classes = "nhsuk-link") {
+                                        +"Go to dashboard"
+                                    }
                                 }
                             }
                         }

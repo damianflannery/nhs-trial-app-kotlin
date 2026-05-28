@@ -32,7 +32,10 @@ fun validatePerson(form: PersonForm): Pair<ValidationResult, PersonSessionData?>
         when {
             form.email.isBlank() -> error("email", "Enter an email address")
             !EMAIL_REGEX.matches(form.email) ->
-                error("email", "Enter an email address in the correct format, like name@example.com")
+                error(
+                    "email",
+                    "Enter an email address in the correct format, like name@example.com",
+                )
         }
 
         val dayMissing = form.dobDay.isBlank()
@@ -66,14 +69,15 @@ fun validatePerson(form: PersonForm): Pair<ValidationResult, PersonSessionData?>
 
     val nhsDigits = form.nhsNumber.replace(" ", "")
     val dob = tryParseDate(form.dobDay, form.dobMonth, form.dobYear)!!
-    return result to PersonSessionData(
-        nhsNumber = nhsDigits,
-        firstName = form.firstName.trim(),
-        lastName = form.lastName.trim(),
-        email = form.email.trim(),
-        dob = dob.toString(),
-        gender = form.gender,
-    )
+    return result to
+        PersonSessionData(
+            nhsNumber = nhsDigits,
+            firstName = form.firstName.trim(),
+            lastName = form.lastName.trim(),
+            email = form.email.trim(),
+            dob = dob.toString(),
+            gender = form.gender,
+        )
 }
 
 fun isValidNhsModulus11(digits: String): Boolean {

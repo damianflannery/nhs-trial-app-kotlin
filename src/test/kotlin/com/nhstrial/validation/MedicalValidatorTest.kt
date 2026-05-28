@@ -5,12 +5,8 @@ import org.junit.jupiter.api.Test
 
 class MedicalValidatorTest {
 
-    private fun validForm() = MedicalForm(
-        bpSystolic = "120",
-        bpDiastolic = "80",
-        treatment = "Drug",
-        sideEffects = "",
-    )
+    private fun validForm() =
+        MedicalForm(bpSystolic = "120", bpDiastolic = "80", treatment = "Drug", sideEffects = "")
 
     @Test
     fun `valid form produces no errors`() {

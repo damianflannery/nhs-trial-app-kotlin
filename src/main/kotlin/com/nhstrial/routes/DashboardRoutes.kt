@@ -6,12 +6,12 @@ import com.nhstrial.model.TrialSummary
 import com.nhstrial.service.TrialService
 import io.ktor.server.html.*
 import io.ktor.server.routing.*
+import java.time.LocalDate
+import java.time.Period
 import kotlinx.html.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import java.time.LocalDate
-import java.time.Period
 
 @Serializable
 data class BpDataPoint(
@@ -60,12 +60,6 @@ fun Route.dashboardRoutes(trialService: TrialService) {
         val trials = trialService.findAllTrials()
         val dataPoints = trials.map { it.toDataPoint() }
         val json = Json.encodeToString(ListSerializer(BpDataPoint.serializer()), dataPoints)
-        call.respondHtml {
-            body {
-                script {
-                    unsafe { +"window.__bpData = $json;" }
-                }
-            }
-        }
+        call.respondHtml { body { script { unsafe { +"window.__bpData = $json;" } } } }
     }
 }

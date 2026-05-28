@@ -24,7 +24,7 @@ fun HTML.nhsPage(title: String, block: BODY.() -> Unit) {
                         attributes["aria-label"] = "NHS homepage"
                         span(classes = "nhsuk-organisation-name") {
                             +"NHS "
-                            span(classes = "nhsuk-organisation-name-separator") { }
+                            span(classes = "nhsuk-organisation-name-separator") {}
                             +"Clinical Trial"
                         }
                     }

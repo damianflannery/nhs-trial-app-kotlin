@@ -11,8 +11,11 @@ import org.slf4j.LoggerFactory
 
 interface TrialService {
     suspend fun existsByNhsNumber(nhsNumber: String): Boolean
+
     suspend fun existsByEmail(email: String): Boolean
+
     suspend fun saveTrial(person: PersonSessionData, medical: MedicalData)
+
     suspend fun findAllTrials(): List<TrialSummary>
 }
 

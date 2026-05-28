@@ -50,21 +50,20 @@ fun Route.medicalRoutes(trialService: TrialService) {
         }
 
         val params = call.receiveParameters()
-        val form = MedicalForm(
-            bpSystolic = params["bpSystolic"].orEmpty(),
-            bpDiastolic = params["bpDiastolic"].orEmpty(),
-            treatment = params["treatment"].orEmpty(),
-            sideEffects = params["sideEffects"].orEmpty(),
-        )
+        val form =
+            MedicalForm(
+                bpSystolic = params["bpSystolic"].orEmpty(),
+                bpDiastolic = params["bpDiastolic"].orEmpty(),
+                treatment = params["treatment"].orEmpty(),
+                sideEffects = params["sideEffects"].orEmpty(),
+            )
 
         val (result, medicalData) = validateMedical(form)
         val isHtmx = call.request.headers["HX-Request"] == "true"
 
         if (result.hasErrors || medicalData == null) {
             if (isHtmx) {
-                call.respondHtml {
-                    body { medicalFormContent(form, result.errors) }
-                }
+                call.respondHtml { body { medicalFormContent(form, result.errors) } }
             } else {
                 call.respondHtml {
                     nhsPage("Clinical measurements – step 2 of 2") {
@@ -93,7 +92,9 @@ fun Route.medicalRoutes(trialService: TrialService) {
                 nhsPage("Sorry, there is a problem with the service") {
                     div(classes = "nhsuk-width-container") {
                         main(classes = "nhsuk-main-wrapper") {
-                            h1(classes = "nhsuk-heading-xl") { +"Sorry, there is a problem with the service" }
+                            h1(classes = "nhsuk-heading-xl") {
+                                +"Sorry, there is a problem with the service"
+                            }
                             p { +"A database error occurred. Please try again later." }
                         }
                     }

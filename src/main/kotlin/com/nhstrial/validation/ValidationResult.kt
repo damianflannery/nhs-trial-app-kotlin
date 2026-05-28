@@ -1,12 +1,10 @@
 package com.nhstrial.validation
 
-data class ValidationResult(
-    val errors: Map<String, String> = emptyMap(),
-) {
-    val hasErrors: Boolean get() = errors.isNotEmpty()
+data class ValidationResult(val errors: Map<String, String> = emptyMap()) {
+    val hasErrors: Boolean
+        get() = errors.isNotEmpty()
 
-    operator fun plus(other: ValidationResult) =
-        ValidationResult(errors + other.errors)
+    operator fun plus(other: ValidationResult) = ValidationResult(errors + other.errors)
 }
 
 class ValidationResultBuilder {

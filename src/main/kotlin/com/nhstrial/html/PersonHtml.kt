@@ -14,7 +14,10 @@ fun FlowContent.personFormContent(form: PersonForm, errors: Map<String, String>)
         nhsErrorSummary(errors)
 
         h1(classes = "nhsuk-heading-xl") { +"Participant details" }
-        p(classes = "nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-0 nhsuk-u-margin-bottom-6") {
+        p(
+            classes =
+                "nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-0 nhsuk-u-margin-bottom-6"
+        ) {
             +"Step 1 of 2"
         }
 
@@ -23,7 +26,8 @@ fun FlowContent.personFormContent(form: PersonForm, errors: Map<String, String>)
             label = "NHS number",
             value = form.nhsNumber,
             error = errors["nhsNumber"],
-            hint = "This is a 10 digit number (like 999 123 4567) that you can find on an NHS letter, prescription or in the NHS App",
+            hint =
+                "This is a 10 digit number (like 999 123 4567) that you can find on an NHS letter, prescription or in the NHS App",
             inputType = "text",
             extraClasses = "nhsuk-input--width-10",
             autocomplete = "off",
@@ -67,8 +71,6 @@ fun FlowContent.personFormContent(form: PersonForm, errors: Map<String, String>)
             error = errors["gender"],
         )
 
-        button(classes = "nhsuk-button", type = ButtonType.submit) {
-            +"Next"
-        }
+        button(classes = "nhsuk-button", type = ButtonType.submit) { +"Next" }
     }
 }

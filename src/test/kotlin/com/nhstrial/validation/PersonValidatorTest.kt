@@ -11,16 +11,17 @@ class PersonValidatorTest {
     private val validNhs1 = "9434765919"
     private val validNhs2 = "1112223339"
 
-    private fun validForm(nhsNumber: String = validNhs1) = PersonForm(
-        nhsNumber = nhsNumber,
-        firstName = "Jane",
-        lastName = "Doe",
-        email = "jane.doe@example.com",
-        dobDay = "15",
-        dobMonth = "6",
-        dobYear = "1990",
-        gender = "Female",
-    )
+    private fun validForm(nhsNumber: String = validNhs1) =
+        PersonForm(
+            nhsNumber = nhsNumber,
+            firstName = "Jane",
+            lastName = "Doe",
+            email = "jane.doe@example.com",
+            dobDay = "15",
+            dobMonth = "6",
+            dobYear = "1990",
+            gender = "Female",
+        )
 
     @Test
     fun `valid form produces no errors`() {
@@ -82,19 +83,22 @@ class PersonValidatorTest {
 
     @Test
     fun `impossible date triggers error`() {
-        val (result, _) = validatePerson(validForm().copy(dobDay = "31", dobMonth = "2", dobYear = "2000"))
+        val (result, _) =
+            validatePerson(validForm().copy(dobDay = "31", dobMonth = "2", dobYear = "2000"))
         assertTrue(result.errors.containsKey("dob"))
     }
 
     @Test
     fun `future date of birth triggers error`() {
-        val (result, _) = validatePerson(validForm().copy(dobDay = "1", dobMonth = "1", dobYear = "2099"))
+        val (result, _) =
+            validatePerson(validForm().copy(dobDay = "1", dobMonth = "1", dobYear = "2099"))
         assertEquals("Date of birth must be in the past", result.errors["dob"])
     }
 
     @Test
     fun `participant under 18 triggers error`() {
-        val (result, _) = validatePerson(validForm().copy(dobDay = "1", dobMonth = "1", dobYear = "2020"))
+        val (result, _) =
+            validatePerson(validForm().copy(dobDay = "1", dobMonth = "1", dobYear = "2020"))
         assertEquals("Participant must be at least 18 years old", result.errors["dob"])
     }
 

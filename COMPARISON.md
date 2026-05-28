@@ -358,3 +358,39 @@ form(action = "/person", method = FormMethod.post) {
 
 On success the server returns `HX-Redirect: /medical` and HTMX navigates the browser.  
 On validation failure the server returns the form fragment alone and HTMX swaps it in — the page header, footer, and navigation never re-render.
+
+---
+
+## Operational differences
+
+### Startup time
+
+Both applications run on the JVM, so neither starts as fast as a compiled native binary. Within the JVM world, Ktor starts noticeably faster than Tomcat.
+
+The Java app cold-starts in roughly 3–6 seconds. Tomcat must initialise the servlet container, scan the WAR for `@WebServlet` annotations, set up classloaders, and then load the application before the first request can be served.
+
+The Kotlin app cold-starts in roughly 1–2 seconds. The fat JAR starts the JVM, Netty binds the port, Flyway runs migrations, and the app is ready. There is no container scan step.
+
+The gap matters most in Kubernetes autoscaling (new pods become ready sooner), local development (faster iteration between restarts), and serverless environments where JVM cold start time is a direct cost.
+
+There is also a future path available to Ktor that is not practical for Servlet apps: **GraalVM native compilation** can reduce startup to milliseconds and significantly cut memory usage. Ktor has official native image support. Tomcat and the Servlet container are not realistically compilable to native without a framework specifically designed around it (Quarkus, Micronaut).
+
+### Making upgrades
+
+The Java project has **two independent upgrade tracks**: the application dependencies (`pom.xml`) and the Tomcat server itself, which is a separately installed and managed runtime. These can drift out of sync. JSTL and JSP versions are also tied to the Servlet spec version, so a Tomcat major upgrade can cascade into template-layer changes.
+
+The Jakarta EE 9 transition is a concrete example of the cost: every `javax.*` import across the codebase had to be renamed to `jakarta.*` — a sweeping breaking change caused by a spec rename, not a logic change.
+
+The Kotlin project has **one upgrade track**: `build.gradle.kts`. There is no separately managed runtime. Ktor publishes versioned migration guides, and Kotlin itself has a strong backward compatibility record.
+
+### Deployment flexibility
+
+The WAR format requires a running Tomcat instance as a host. In Docker this means a Tomcat base image. The fat JAR requires nothing beyond a JRE — `java -jar app.jar` — and produces a smaller image using a minimal JRE base.
+
+| | Java WAR / Tomcat | Kotlin fat JAR |
+|---|---|---|
+| **Run it** | Deploy into a running Tomcat instance | `java -jar app.jar` |
+| **Docker base image** | `tomcat:10-jdk21` — includes the full server | `eclipse-temurin:21-jre-alpine` — JRE only |
+| **Cloud platforms** | Needs a Tomcat-aware host or custom image | Works on any platform that runs a container: Heroku, Fly.io, Railway, ECS, Cloud Run, Kubernetes |
+| **12-factor compliance** | Requires extra effort to externalise config from the WAR | Natural fit — single process, port from env var, logs to stdout |
+| **GraalVM native** | Not practical | Supported by Ktor |

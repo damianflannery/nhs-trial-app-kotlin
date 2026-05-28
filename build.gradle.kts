@@ -5,6 +5,7 @@ plugins {
     kotlin("plugin.serialization") version "2.1.0"
     id("com.github.node-gradle.node") version "7.0.2"
     id("com.gradleup.shadow") version "8.3.6"
+    id("com.ncorti.ktfmt.gradle") version "0.26.0"
     application
 }
 
@@ -69,6 +70,10 @@ val copyNhsAssets = tasks.register<NpmTask>("copyNhsAssets") {
 
 tasks.processResources {
     dependsOn(copyNhsAssets)
+}
+
+ktfmt {
+    kotlinLangStyle() // Kotlin coding conventions: 4-space indent, 100-char line width
 }
 
 tasks.shadowJar {

@@ -27,7 +27,9 @@ fun Application.configureStatusPages() {
                 nhsPage("Sorry, there is a problem with the service") {
                     div(classes = "nhsuk-width-container") {
                         main(classes = "nhsuk-main-wrapper") {
-                            h1(classes = "nhsuk-heading-xl") { +"Sorry, there is a problem with the service" }
+                            h1(classes = "nhsuk-heading-xl") {
+                                +"Sorry, there is a problem with the service"
+                            }
                             p { +"Try again later." }
                         }
                     }

@@ -14,10 +14,7 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
-fun Application.configureRouting(
-    personRepository: PersonRepository,
-    trialService: TrialService,
-) {
+fun Application.configureRouting(personRepository: PersonRepository, trialService: TrialService) {
     routing {
         staticResources("/nhsuk", "static/nhsuk")
 
@@ -26,9 +23,7 @@ fun Application.configureRouting(
         // cannot map result columns (e.g. missing exposed-java-time service files).
         get("/health") {
             try {
-                newSuspendedTransaction(Dispatchers.IO) {
-                    exec("SELECT 1")
-                }
+                newSuspendedTransaction(Dispatchers.IO) { exec("SELECT 1") }
                 call.respond(HttpStatusCode.OK, "OK")
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.ServiceUnavailable, "DB unavailable: ${e.message}")

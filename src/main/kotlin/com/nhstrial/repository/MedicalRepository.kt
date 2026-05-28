@@ -1,8 +1,8 @@
 package com.nhstrial.repository
 
 import com.nhstrial.table.MedicalTable
-import org.jetbrains.exposed.sql.insert
 import java.time.LocalDateTime
+import org.jetbrains.exposed.sql.insert
 
 data class MedicalData(
     val bpSystolic: Int,

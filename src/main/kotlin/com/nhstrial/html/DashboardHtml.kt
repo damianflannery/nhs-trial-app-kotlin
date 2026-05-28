@@ -2,8 +2,6 @@ package com.nhstrial.html
 
 import com.nhstrial.model.TrialSummary
 import kotlinx.html.*
-import java.time.LocalDate
-import java.time.Period
 
 fun FlowContent.dashboardContent(trials: List<TrialSummary>, inlineJson: String = "[]") {
 
@@ -222,119 +220,120 @@ input:checked + .db-toggle-slider:before { transform:translateX(22px); }
         script {
             unsafe {
                 +"""
-(function () {
-  var allData = window.__bpData || [];
+                (function () {
+                  var allData = window.__bpData || [];
 
-  var MALE_COL   = '#003087';
-  var FEMALE_COL = '#d4537e';
-  var MIN_AGE = 20, MAX_AGE = 85, MIN_R = 5, MAX_R = 21;
+                  var MALE_COL   = '#003087';
+                  var FEMALE_COL = '#d4537e';
+                  var MIN_AGE = 20, MAX_AGE = 85, MIN_R = 5, MAX_R = 21;
 
-  function ageR(age) {
-    var c = Math.max(MIN_AGE, Math.min(MAX_AGE, age));
-    return MIN_R + (MAX_R - MIN_R) * (c - MIN_AGE) / (MAX_AGE - MIN_AGE);
-  }
-  function genderCol(g)   { return g === 'Male' ? MALE_COL : FEMALE_COL; }
-  function pointStyle(tx) { return tx === 'Drug' ? 'circle' : 'rect'; }
+                  function ageR(age) {
+                    var c = Math.max(MIN_AGE, Math.min(MAX_AGE, age));
+                    return MIN_R + (MAX_R - MIN_R) * (c - MIN_AGE) / (MAX_AGE - MIN_AGE);
+                  }
+                  function genderCol(g)   { return g === 'Male' ? MALE_COL : FEMALE_COL; }
+                  function pointStyle(tx) { return tx === 'Drug' ? 'circle' : 'rect'; }
 
-  var sexFilter = 'Both', txFilter = 'Both', useAge = true;
+                  var sexFilter = 'Both', txFilter = 'Both', useAge = true;
 
-  function buildDataset(data) {
-    return {
-      label: 'Participants',
-      data: data.map(function(d) { return { x:d.systolic, y:d.diastolic, _d:d }; }),
-      backgroundColor: data.map(function(d) { return genderCol(d.gender) + 'bb'; }),
-      borderColor:     data.map(function(d) { return genderCol(d.gender); }),
-      pointStyle:      data.map(function(d) { return pointStyle(d.treatment); }),
-      radius:          useAge ? data.map(function(d) { return ageR(d.age); }) : 8,
-      hoverRadius:     useAge ? data.map(function(d) { return ageR(d.age) + 3; }) : 11,
-      borderWidth: 1.5,
-    };
-  }
+                  function buildDataset(data) {
+                    return {
+                      label: 'Participants',
+                      data: data.map(function(d) { return { x:d.systolic, y:d.diastolic, _d:d }; }),
+                      backgroundColor: data.map(function(d) { return genderCol(d.gender) + 'bb'; }),
+                      borderColor:     data.map(function(d) { return genderCol(d.gender); }),
+                      pointStyle:      data.map(function(d) { return pointStyle(d.treatment); }),
+                      radius:          useAge ? data.map(function(d) { return ageR(d.age); }) : 8,
+                      hoverRadius:     useAge ? data.map(function(d) { return ageR(d.age) + 3; }) : 11,
+                      borderWidth: 1.5,
+                    };
+                  }
 
-  var ctx = document.getElementById('bpChart');
-  var chart = new Chart(ctx, {
-    type: 'scatter',
-    data: { datasets: [buildDataset(allData)] },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            title: function(items) {
-              var d = items[0].raw._d;
-              return d.gender + ' · ' + d.treatment;
-            },
-            label: function(item) {
-              var d = item.raw._d;
-              var lines = [
-                'Systolic:    ' + d.systolic + ' mmHg',
-                'Diastolic:   ' + d.diastolic + ' mmHg',
-                'Age:         ' + d.age,
-              ];
-              if (d.sideEffects) lines.push('Side effects: ' + d.sideEffects);
-              return lines;
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          title: { display:true, text:'Systolic (mmHg)' },
-          min:90, max:180,
-        },
-        y: {
-          title: { display:true, text:'Diastolic (mmHg)' },
-          min:45, max:115,
-        },
-      },
-    },
-  });
+                  var ctx = document.getElementById('bpChart');
+                  var chart = new Chart(ctx, {
+                    type: 'scatter',
+                    data: { datasets: [buildDataset(allData)] },
+                    options: {
+                      responsive: true,
+                      plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                          callbacks: {
+                            title: function(items) {
+                              var d = items[0].raw._d;
+                              return d.gender + ' · ' + d.treatment;
+                            },
+                            label: function(item) {
+                              var d = item.raw._d;
+                              var lines = [
+                                'Systolic:    ' + d.systolic + ' mmHg',
+                                'Diastolic:   ' + d.diastolic + ' mmHg',
+                                'Age:         ' + d.age,
+                              ];
+                              if (d.sideEffects) lines.push('Side effects: ' + d.sideEffects);
+                              return lines;
+                            },
+                          },
+                        },
+                      },
+                      scales: {
+                        x: {
+                          title: { display:true, text:'Systolic (mmHg)' },
+                          min:90, max:180,
+                        },
+                        y: {
+                          title: { display:true, text:'Diastolic (mmHg)' },
+                          min:45, max:115,
+                        },
+                      },
+                    },
+                  });
 
-  function applyFilters() {
-    var filtered = allData.filter(function(d) {
-      return (sexFilter === 'Both' || d.gender === sexFilter) &&
-             (txFilter  === 'Both' || d.treatment === txFilter);
-    });
-    chart.data.datasets = [buildDataset(filtered)];
-    chart.update();
-  }
+                  function applyFilters() {
+                    var filtered = allData.filter(function(d) {
+                      return (sexFilter === 'Both' || d.gender === sexFilter) &&
+                             (txFilter  === 'Both' || d.treatment === txFilter);
+                    });
+                    chart.data.datasets = [buildDataset(filtered)];
+                    chart.update();
+                  }
 
-  // Button groups
-  document.querySelectorAll('.db-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var group = btn.dataset.group;
-      document.querySelectorAll('.db-btn[data-group="' + group + '"]').forEach(function(b) {
-        b.classList.remove('active');
-      });
-      btn.classList.add('active');
-      if (group === 'sex') sexFilter = btn.dataset.value;
-      else txFilter = btn.dataset.value;
-      applyFilters();
-    });
-  });
+                  // Button groups
+                  document.querySelectorAll('.db-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                      var group = btn.dataset.group;
+                      document.querySelectorAll('.db-btn[data-group="' + group + '"]').forEach(function(b) {
+                        b.classList.remove('active');
+                      });
+                      btn.classList.add('active');
+                      if (group === 'sex') sexFilter = btn.dataset.value;
+                      else txFilter = btn.dataset.value;
+                      applyFilters();
+                    });
+                  });
 
-  // Age toggle
-  var toggleEl  = document.getElementById('toggle-age');
-  var toggleLbl = document.getElementById('toggle-age-label');
-  var ageLegend = document.getElementById('age-legend');
+                  // Age toggle
+                  var toggleEl  = document.getElementById('toggle-age');
+                  var toggleLbl = document.getElementById('toggle-age-label');
+                  var ageLegend = document.getElementById('age-legend');
 
-  function syncAgeLegend() {
-    ageLegend.querySelectorAll('.db-legend-item').forEach(function(el) {
-      el.classList.toggle('db-legend-dimmed', !useAge);
-    });
-    ageLegend.querySelector('.db-legend-title').classList.toggle('db-legend-dimmed', !useAge);
-  }
+                  function syncAgeLegend() {
+                    ageLegend.querySelectorAll('.db-legend-item').forEach(function(el) {
+                      el.classList.toggle('db-legend-dimmed', !useAge);
+                    });
+                    ageLegend.querySelector('.db-legend-title').classList.toggle('db-legend-dimmed', !useAge);
+                  }
 
-  toggleEl.addEventListener('change', function() {
-    useAge = toggleEl.checked;
-    toggleLbl.textContent = useAge ? 'On — size = age' : 'Off — uniform size';
-    syncAgeLegend();
-    applyFilters();
-  });
-  syncAgeLegend();
-})();
-""".trimIndent()
+                  toggleEl.addEventListener('change', function() {
+                    useAge = toggleEl.checked;
+                    toggleLbl.textContent = useAge ? 'On — size = age' : 'Off — uniform size';
+                    syncAgeLegend();
+                    applyFilters();
+                  });
+                  syncAgeLegend();
+                })();
+                """
+                    .trimIndent()
             }
         }
     }

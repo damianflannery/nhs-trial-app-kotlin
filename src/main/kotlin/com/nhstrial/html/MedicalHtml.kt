@@ -14,7 +14,10 @@ fun FlowContent.medicalFormContent(form: MedicalForm, errors: Map<String, String
         nhsErrorSummary(errors)
 
         h1(classes = "nhsuk-heading-xl") { +"Clinical measurements" }
-        p(classes = "nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-0 nhsuk-u-margin-bottom-6") {
+        p(
+            classes =
+                "nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-0 nhsuk-u-margin-bottom-6"
+        ) {
             +"Step 2 of 2"
         }
 
@@ -23,7 +26,8 @@ fun FlowContent.medicalFormContent(form: MedicalForm, errors: Map<String, String
             label = "Systolic blood pressure (mmHg)",
             value = form.bpSystolic,
             error = errors["bpSystolic"],
-            hint = "The higher number on your monitor, representing the pressure when your heart beats",
+            hint =
+                "The higher number on your monitor, representing the pressure when your heart beats",
             inputType = "number",
             extraClasses = "nhsuk-input--width-5",
         )
@@ -32,7 +36,8 @@ fun FlowContent.medicalFormContent(form: MedicalForm, errors: Map<String, String
             label = "Diastolic blood pressure (mmHg)",
             value = form.bpDiastolic,
             error = errors["bpDiastolic"],
-            hint = "The lower number on your monitor, representing the pressure when your heart rests between beats",
+            hint =
+                "The lower number on your monitor, representing the pressure when your heart rests between beats",
             inputType = "number",
             extraClasses = "nhsuk-input--width-5",
         )
@@ -41,7 +46,8 @@ fun FlowContent.medicalFormContent(form: MedicalForm, errors: Map<String, String
             fieldLegend = "Treatment",
             options = listOf("Drug", "Placebo"),
             selectedValue = form.treatment,
-            hint = "Whether you are taking the drug or are on placebo (obviously this is handled behind the scenes irl)",
+            hint =
+                "Whether you are taking the drug or are on placebo (obviously this is handled behind the scenes irl)",
             error = errors["treatment"],
         )
         nhsTextarea(
@@ -52,8 +58,6 @@ fun FlowContent.medicalFormContent(form: MedicalForm, errors: Map<String, String
             error = errors["sideEffects"],
         )
 
-        button(classes = "nhsuk-button", type = ButtonType.submit) {
-            +"Finish"
-        }
+        button(classes = "nhsuk-button", type = ButtonType.submit) { +"Finish" }
     }
 }

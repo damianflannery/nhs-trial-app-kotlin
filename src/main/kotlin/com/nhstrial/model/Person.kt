@@ -1,8 +1,8 @@
 package com.nhstrial.model
 
-import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlinx.serialization.Serializable
 
 data class Person(
     val id: Int,

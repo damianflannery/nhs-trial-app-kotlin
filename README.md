@@ -3,6 +3,8 @@
 A Kotlin/Ktor port of the [NHS Clinical Trial Registration](https://github.com/damianflannery/nhs-trial-app) app for enrolling participants into a clinical trial.  
 Built with Ktor, HTMX, PostgreSQL, Exposed ORM, and Flyway; styled with the [NHS Design System v9](https://service-manual.nhs.uk/design-system).
 
+For a detailed side-by-side comparison of the two implementations — architecture, testing strategy, and where Kotlin has a meaningful advantage over the original Java/Servlet/JSP stack — see [COMPARISON.md](COMPARISON.md).
+
 ---
 
 ## Architecture overview

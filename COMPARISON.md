@@ -204,6 +204,23 @@ In the Java validator, `request.getParameter()` can return `null`. The code guar
 
 In Kotlin, `String?` (nullable) and `String` (non-nullable) are distinct types. A nullable value cannot be passed where a non-nullable is expected without an explicit null check — the compiler refuses to compile the code.
 
+### 5. Custom JavaScript removed
+
+The Java project contains a hand-written `validation.js` that duplicates the server-side validation rules client-side. It has its own test suite (Karma + Jasmine) that must be kept in sync with the Java validator whenever a rule changes — two places to update, two suites to run.
+
+The Kotlin project has **zero lines of custom JavaScript**. The only JS files on disk are the vendored NHS Design System bundle (third-party, unmodified) and a build-time Node script that copies assets into the resource directory. Neither is code the team owns or maintains.
+
+What replaced `validation.js`:
+
+| Java need | Kotlin replacement |
+|---|---|
+| AJAX form submission (no full reload) | Three HTMX attributes on the `<form>` tag (`hx-post`, `hx-target`, `hx-swap`) |
+| Partial page update on error | HTMX swaps the returned form fragment in-place |
+| Client-side redirect on success | Server sends `HX-Redirect` header; HTMX navigates the browser |
+| `validation.js` unit tests (Karma/Jasmine) | Playwright E2E tests cover the same user-visible outcomes end-to-end |
+
+The result is one source of truth for validation logic (the Kotlin validator), one test suite, and no risk of the client and server drifting out of sync.
+
 ---
 
 ## Code comparison: JSP + Servlet vs kotlinx.html + Ktor
@@ -341,3 +358,39 @@ form(action = "/person", method = FormMethod.post) {
 
 On success the server returns `HX-Redirect: /medical` and HTMX navigates the browser.  
 On validation failure the server returns the form fragment alone and HTMX swaps it in — the page header, footer, and navigation never re-render.
+
+---
+
+## Operational differences
+
+### Startup time
+
+Both applications run on the JVM, so neither starts as fast as a compiled native binary. Within the JVM world, Ktor starts noticeably faster than Tomcat.
+
+The Java app cold-starts in roughly 3–6 seconds. Tomcat must initialise the servlet container, scan the WAR for `@WebServlet` annotations, set up classloaders, and then load the application before the first request can be served.
+
+The Kotlin app cold-starts in roughly 1–2 seconds. The fat JAR starts the JVM, Netty binds the port, Flyway runs migrations, and the app is ready. There is no container scan step.
+
+The gap matters most in Kubernetes autoscaling (new pods become ready sooner), local development (faster iteration between restarts), and serverless environments where JVM cold start time is a direct cost.
+
+There is also a future path available to Ktor that is not practical for Servlet apps: **GraalVM native compilation** can reduce startup to milliseconds and significantly cut memory usage. Ktor has official native image support. Tomcat and the Servlet container are not realistically compilable to native without a framework specifically designed around it (Quarkus, Micronaut).
+
+### Making upgrades
+
+The Java project has **two independent upgrade tracks**: the application dependencies (`pom.xml`) and the Tomcat server itself, which is a separately installed and managed runtime. These can drift out of sync. JSTL and JSP versions are also tied to the Servlet spec version, so a Tomcat major upgrade can cascade into template-layer changes.
+
+The Jakarta EE 9 transition is a concrete example of the cost: every `javax.*` import across the codebase had to be renamed to `jakarta.*` — a sweeping breaking change caused by a spec rename, not a logic change.
+
+The Kotlin project has **one upgrade track**: `build.gradle.kts`. There is no separately managed runtime. Ktor publishes versioned migration guides, and Kotlin itself has a strong backward compatibility record.
+
+### Deployment flexibility
+
+The WAR format requires a running Tomcat instance as a host. In Docker this means a Tomcat base image. The fat JAR requires nothing beyond a JRE — `java -jar app.jar` — and produces a smaller image using a minimal JRE base.
+
+| | Java WAR / Tomcat | Kotlin fat JAR |
+|---|---|---|
+| **Run it** | Deploy into a running Tomcat instance | `java -jar app.jar` |
+| **Docker base image** | `tomcat:10-jdk21` — includes the full server | `eclipse-temurin:21-jre-alpine` — JRE only |
+| **Cloud platforms** | Needs a Tomcat-aware host or custom image | Works on any platform that runs a container: Heroku, Fly.io, Railway, ECS, Cloud Run, Kubernetes |
+| **12-factor compliance** | Requires extra effort to externalise config from the WAR | Natural fit — single process, port from env var, logs to stdout |
+| **GraalVM native** | Not practical | Supported by Ktor |
